@@ -1,111 +1,182 @@
-# n8n-nodes-volcengine-ai
+# n8n-nodes-volcengine-ai-enhanced
 
 [![English](https://img.shields.io/badge/English-Click-yellow)](README.md)
 [![中文文档](https://img.shields.io/badge/中文文档-点击查看-orange)](README-zh.md)
 
-This is an n8n community node that allows you to use VolcEngine's AI services in n8n workflows, including chat completion and code completion features.
+This is an enhanced n8n community node for VolcEngine Ark (火山方舟) AI services, forked and improved from [crazyyanchao/n8n-nodes-volcengine-ai](https://github.com/crazyyanchao/n8n-nodes-volcengine-ai).
 
-This node supports the following VolcEngine AI services:
-- **Chat Completion**: Provides intelligent conversation capabilities with support for multi-turn conversations and rich parameter configuration
-- **FIM Completion (Fill-In-the-Middle)**: Provides code completion and filling functionality, supporting middle part filling in code
-- **Speech Synthesis**: Converts text to natural speech with support for multiple voices and audio formats
-- **Image Generation**: Generates high-quality images based on text descriptions with support for multiple models and output formats
+## 🙏 Acknowledgments
 
-Through this node, you can easily integrate VolcEngine's AI capabilities into your automation workflows to achieve intelligent conversations, content generation, code assistance, speech synthesis, image generation, and more.
+This project is based on the excellent work by [@crazyyanchao](https://github.com/crazyyanchao). We extend our sincere thanks for the original implementation.
 
-[n8n](https://n8n.io/) is a workflow automation platform with [fair-code licensing](https://docs.n8n.io/reference/license/).
+**Original Repository**: [crazyyanchao/n8n-nodes-volcengine-ai](https://github.com/crazyyanchao/n8n-nodes-volcengine-ai)
 
-[Installation](#installation)  
-[Operations](#operations)  
-[Credentials](#credentials)  
-[Compatibility](#compatibility)  
-[Usage Instructions](#usage-instructions)  
-[Resources](#resources)  
+## ✨ Key Enhancements
 
-## Installation
+This enhanced version introduces the following major improvements:
+
+### 🚀 Dynamic Endpoint Loading
+- **Automatic Endpoint Discovery**: Dynamically loads available endpoints from VolcEngine Ark API instead of hardcoded model lists
+- **Real-time Updates**: Always shows the latest available endpoints with "Running" status
+- **Smart Filtering**: Automatically filters and displays only active endpoints
+
+### 🧠 Thinking Mode Support
+- **Deep Thinking Mode**: Full support for DeepSeek R1, DeepSeek V3.2, and other models with thinking capabilities
+- **Three Modes Available**:
+  - `disabled`: Force disable deep thinking
+  - `enabled`: Force enable deep thinking with reasoning chain output
+  - `auto`: Model automatically decides when to use deep thinking
+- **Official API Compliance**: Implements according to [VolcEngine Ark documentation](https://www.volcengine.com/docs/82379/1449737)
+
+### 🔐 Enhanced Authentication
+- **Dual Authentication Support**: 
+  - API Token for model API calls (Bearer or X-Api-Access-Key)
+  - AK/SK (Access Key/Secret Key) for ListEndpoints API with HMAC-SHA256 signature
+- **VolcEngine V4 Signature**: Proper implementation of VolcEngine API signature algorithm
+
+### 🎯 Focused on Chat Model
+- **Chat Model Node Only**: This project focuses exclusively on the chat model node for n8n's AI workflows
+- **n8n Integration**: Designed specifically for use with:
+  - **AI Chain**: Connect to AI Chain nodes to build complex reasoning workflows
+  - **AI Agent**: Connect to AI Agent nodes for autonomous task execution with reasoning capabilities
+  - **LangChain Compatibility**: Fully compatible with n8n's LangChain integration
+
+## 📋 Features
+
+This node provides:
+
+- **Dynamic Endpoint Selection**: Choose from live endpoints loaded from VolcEngine Ark
+- **Chat Completion**: Intelligent conversation capabilities with multi-turn support
+- **Thinking Mode**: Enable deep reasoning for complex tasks
+- **Rich Parameter Configuration**: Temperature, max tokens, penalties, response format, etc.
+- **LangChain Integration**: Compatible with n8n's AI chain and agent workflows
+
+## 🚀 Installation
 
 Follow the [installation guide](https://docs.n8n.io/integrations/community-nodes/installation/) in the n8n community nodes documentation.
 
-Alternatively, you can also refer to these [n8n workflow templates](https://github.com/crazyyanchao/n8n-workflow-template).
+### Using npm
 
-## Operations
+```bash
+npm install n8n-nodes-volcengine-ai-enhanced
+```
 
-This node supports the following resource types and operations:
+### Manual Installation
 
-### Chat Completion
-- **Complete Conversation**: Create model responses with support for multi-turn conversations
-  - Support for system messages, user messages, and assistant messages
-  - Dynamic loading of available AI models
-  - Rich parameter configuration options
-  - Support for simplified output mode
+1. Clone this repository
+2. Run `npm install`
+3. Run `npm run build`
+4. Copy the `dist` folder to your n8n custom nodes directory
 
-### FIM Completion (Fill-In-the-Middle Completion)
-- **Code Completion**: Create code fill completion
-  - Support for middle part filling in code
-  - Configurable prefix and suffix text
-  - Support for various code completion scenarios
-  - Provides code generation and editing functionality
+## 🔑 Credentials Setup
 
-### Speech Synthesis
-- **Text-to-Speech**: Convert text to natural speech
-  - Support for multiple voices and languages
-  - Configurable parameters such as speed, volume, emotion, etc.
-  - Support for multiple audio formats (MP3, OGG, PCM)
-  - Provides local caching functionality
+To use this node, you need to configure the **VolcEngine AI Enhanced API** credentials:
 
-### Image Generation
-- **AI Image Generation**: Generate high-quality images based on text descriptions
-  - Support for multiple generation models (doubao-seedream series)
-  - Configurable image dimensions, format, watermark, etc.
-  - Support for single and multiple image generation
-  - Provides multiple output formats (URL, Base64, file, etc.)
+### Required Fields
 
-### Advanced Parameter Configuration
-- **Temperature Control**: Control randomness of generated content (0-1)
-- **Max Tokens**: Set maximum length of generated content (up to 32768)
-- **Frequency Penalty**: Reduce generation of repetitive content (-2 to 2)
-- **Presence Penalty**: Encourage model to discuss new topics (-2 to 2)
-- **Top-P Sampling**: Control nucleus sampling diversity (0-1)
-- **Response Format**: Customize output format
-- **Log Probabilities**: Return probability information of output tokens
+1. **Access Token**: Your VolcEngine AI API token (for model API calls)
+   - Used for chat completion requests
+   - Supports both Bearer and X-Api-Access-Key authentication
 
-## Credentials
+2. **Access Key ID (AK)**: Your VolcEngine Access Key ID
+   - Required for ListEndpoints API calls
+   - Used for HMAC-SHA256 signature authentication
 
-To use this node, you need:
+3. **Secret Access Key (SK)**: Your VolcEngine Secret Access Key
+   - Required for ListEndpoints API calls
+   - Used for HMAC-SHA256 signature authentication
 
-1. **Register VolcEngine Account**: Visit [VolcEngine Official Website](https://www.volcengine.com/) to register an account
-2. **Enable AI Services**: Enable AI-related services in the VolcEngine console
-3. **Obtain API Key**: Create an API Key in the VolcEngine console
-4. **Configure Credentials**: Configure VolcEngine AI credentials in n8n
+4. **Region**: VolcEngine region (default: `cn-beijing`)
+   - Used for API endpoint selection
 
-### Authentication Methods
-- **API Key Authentication**: Use VolcEngine API Key for API calls, choose X-Api-Access-Key or Authorization
-- **Automatic Authentication**: The node automatically adds authentication information to request headers
-- **Note**: Currently audio uses X-Api-Access-Key, while others use Authorization authentication
+### How to Get Credentials
 
-## Usage Instructions
+1. **Register VolcEngine Account**: Visit [VolcEngine Official Website](https://www.volcengine.com/) to register
+2. **Enable Ark Service**: Enable VolcEngine Ark service in the console
+3. **Create API Token**: Create an API token in the VolcEngine console for model API calls
+4. **Create Access Key**: Create an Access Key (AK/SK) in the VolcEngine console for ListEndpoints API
 
-### Basic Usage Workflow
+## 📖 Usage Instructions
 
-1. **Install Node**: Follow the installation guide to install this community node
-2. **Configure Credentials**: Configure VolcEngine AI API credentials in n8n
-3. **Create Workflow**: Add VolcEngine AI node to n8n workflow
-4. **Select Resource Type**: Choose "Chat" or "FIM" resource type
-5. **Configure Parameters**: Configure model, prompts, and other parameters according to needs
+### Basic Workflow
+
+1. **Install the Node**: Install this community node in your n8n instance
+2. **Configure Credentials**: 
+   - Add "VolcEngine AI Enhanced API" credentials
+   - Fill in Access Token, Access Key ID, Secret Access Key, and Region
+3. **Add Node to Workflow**: 
+   - Add "VolcengineAi Chat Model (Enhanced)" node to your workflow
+   - Connect it to AI Chain or AI Agent nodes
+4. **Select Endpoint**: 
+   - Choose an endpoint from the dropdown (dynamically loaded)
+   - Or manually enter an endpoint ID
+5. **Configure Options** (optional):
+   - Enable Thinking Mode if your model supports it
+   - Adjust temperature, max tokens, etc.
 6. **Execute Workflow**: Run the workflow to get AI responses
 
-## Compatibility
+### Thinking Mode Configuration
+
+For models that support deep thinking (e.g., DeepSeek R1, DeepSeek V3.2):
+
+1. Select your endpoint
+2. In **Options**, set **Thinking Mode** to:
+   - `disabled`: No thinking chain output
+   - `enabled`: Always output thinking chain
+   - `auto`: Let the model decide
+
+### Example: Using with AI Chain
+
+```
+[AI Chain] → [VolcengineAi Chat Model (Enhanced)] → [Output]
+```
+
+The enhanced node provides the language model to the AI Chain, which can then process complex workflows with reasoning capabilities.
+
+## ⚙️ Available Options
+
+- **Base URL**: Override default API endpoint
+- **Frequency Penalty**: Reduce repetitive content (-2 to 2)
+- **Max Retries**: Maximum retry attempts
+- **Maximum Number of Tokens**: Max output length (up to 32768)
+- **Presence Penalty**: Encourage new topics (-2 to 2)
+- **Reasoning Effort**: Control reasoning token usage (low/medium/high)
+- **Response Format**: Text or JSON output
+- **Sampling Temperature**: Control randomness (0-2)
+- **Thinking Mode**: Enable/disable/auto deep thinking
+- **Timeout**: Request timeout in milliseconds
+- **Top P**: Nucleus sampling diversity (0-1)
+
+## 🔧 Compatibility
 
 - **Minimum n8n Version**: 1.0.0
 - **Node.js Version**: >=22.16
 - **Tested Version**: n8n 1.0.0+
 
-## Resources
+## 📚 Resources
 
 * [n8n Community Nodes Documentation](https://docs.n8n.io/integrations/#community-nodes)
-* [VolcEngine AI Services Documentation](https://www.volcengine.com/docs/82379/1099475)
-* [VolcEngine AI API Reference](https://www.volcengine.com/docs/82379/1099475)
+* [VolcEngine Ark Documentation](https://www.volcengine.com/docs/82379/1099475)
+* [VolcEngine Ark API Reference](https://www.volcengine.com/docs/82379/1099475)
+* [VolcEngine Ark Deep Thinking Guide](https://www.volcengine.com/docs/82379/1449737)
 * [VolcEngine Official Website](https://www.volcengine.com/)
-* [n8n Workflow Templates](https://github.com/crazyyanchao/n8n-workflow-template)
 
-**Note**: Using this node requires a valid VolcEngine account and AI service permissions. Please ensure compliance with VolcEngine's terms of use and API call limits. Please configure appropriate access permissions based on actual usage.
+## 📝 License
+
+MIT License - Same as the original project
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## ⚠️ Notes
+
+- This node requires a valid VolcEngine account with Ark service enabled
+- Please ensure compliance with VolcEngine's terms of use and API call limits
+- The ListEndpoints API requires AK/SK authentication
+- Thinking mode is only available for models that support it (e.g., DeepSeek R1, DeepSeek V3.2)
+
+---
+
+**Forked from**: [crazyyanchao/n8n-nodes-volcengine-ai](https://github.com/crazyyanchao/n8n-nodes-volcengine-ai)  
+**Maintained by**: [@foxtwobao](https://github.com/foxtwobao)

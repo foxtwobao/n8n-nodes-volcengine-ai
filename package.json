@@ -1,6 +1,6 @@
 {
-  "name": "n8n-nodes-volcengine-ai",
-  "version": "0.2.4",
+  "name": "n8n-nodes-volcengine-ai-enhanced",
+  "version": "0.1.0",
   "description": "n8n custom node for VolcEngine AI services including chat completion and code completion",
   "keywords": [
     "n8n-community-node-package",
@@ -13,17 +13,17 @@
     "llm"
   ],
   "license": "MIT",
-  "homepage": "https://github.com/crazyyanchao/n8n-nodes-volcengine-ai",
+  "homepage": "https://github.com/foxtwobao/n8n-nodes-volcengine-ai",
   "author": {
-    "name": "Tony.Ma",
-    "email": "yanchaoma@foxmail.com"
+    "name": "leopold.hu",
+    "email": "hulei.cn@gmail.com"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/crazyyanchao/n8n-nodes-volcengine-ai.git"
+    "url": "https://github.com/foxtwobao/n8n-nodes-volcengine-ai.git"
   },
   "bugs": {
-    "url": "https://github.com/crazyyanchao/n8n-nodes-volcengine-ai/issues"
+    "url": "https://github.com/foxtwobao/n8n-nodes-volcengine-ai/issues"
   },
   "engines": {
     "node": ">=22.16"
@@ -43,14 +43,14 @@
   "n8n": {
     "n8nNodesApiVersion": 1,
     "credentials": [
-      "dist/credentials/VolcengineAiApi.credentials.js"
+      "dist/credentials/VolcengineAiEnhancedApi.credentials.js"
     ],
     "nodes": [
-      "dist/nodes/VolcengineAi/VolcengineAi.node.js",
-      "dist/nodes/VolcengineAiChain/VolcengineAiChain.node.js"
+      "dist/nodes/VolcengineAiChainEnhanced/VolcengineAiChainEnhanced.node.js"
     ]
   },
   "devDependencies": {
+    "@langchain/openai": "^0.4.9",
     "@types/glob": "^9.0.0",
     "@types/node": "^24.2.1",
     "@types/ws": "^8.5.10",

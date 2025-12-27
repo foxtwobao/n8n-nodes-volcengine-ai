@@ -5,27 +5,27 @@ import {
 	type ISupplyDataFunctions,
 	type SupplyData,
 } from 'n8n-workflow';
-import { searchModels } from './methods/loadModels';
+import { searchEndpoints } from './methods/loadEndpoints';
 import { getConnectionHintNoticeField } from './methods/sharedFields';
-import {ChatOpenAI, type ClientOptions} from '@langchain/openai';
+import { ChatOpenAI, type ClientOptions } from '@langchain/openai';
 
-export class VolcengineAiChain implements INodeType {
+export class VolcengineAiChainEnhanced implements INodeType {
 	methods = {
 		listSearch: {
-			searchModels,
+			searchEndpoints,
 		},
 	};
 
 	description: INodeTypeDescription = {
-		displayName: 'VolcengineAi Chat Model',
+		displayName: 'VolcengineAi Chat Model (Enhanced)',
 
-		name: 'volcengineAiChain',
+		name: 'volcengineAiChainEnhanced',
 		icon: { light: 'file:volcengine.logo.svg', dark: 'file:volcengine.logo.svg' },
 		group: ['transform'],
-		version: [1, 1.1, 1.2],
-		description: 'For advanced usage with an AI chain',
+		version: [1],
+		description: 'Enhanced version with dynamic endpoint loading from Volcengine Ark API',
 		defaults: {
-			name: 'VolcengineAi Chat Model',
+			name: 'VolcengineAi Chat Model (Enhanced)',
 		},
 		codex: {
 			categories: ['AI'],
@@ -48,7 +48,7 @@ export class VolcengineAiChain implements INodeType {
 		outputNames: ['Model'],
 		credentials: [
 			{
-				name: 'volcengineAiApi',
+				name: 'volcengineAiEnhancedApi',
 				required: true,
 			},
 		],
@@ -72,48 +72,19 @@ export class VolcengineAiChain implements INodeType {
 				},
 			},
 			{
-				displayName: 'Model',
-				name: 'model',
-				type: 'options',
-				description: 'Select VolcEngine AI model',
-				options: [
-					{ name: 'DeepSeek V3 (250324)', value: 'deepseek-v3-250324' },
-					{ name: 'DeepSeek V3.1 (250821)', value: 'deepseek-v3-1-250821' },
-					{ name: 'Doubao 1.5 Pro 32K Character (250715)', value: 'doubao-1-5-pro-32k-character-250715' },
-					{ name: 'Doubao Seed 1.6 (250615)', value: 'doubao-seed-1-6-250615' },
-					{ name: 'Doubao Seed 1.6 Flash (250615)', value: 'doubao-seed-1-6-flash-250615' },
-					{ name: 'Doubao Seed 1.6 Flash (250715)', value: 'doubao-seed-1-6-flash-250715' },
-					{ name: 'Doubao Seed 1.6 Flash (250828)', value: 'doubao-seed-1-6-flash-250828' },
-					{ name: 'Doubao Seed 1.6 Vision (250815)', value: 'doubao-seed-1-6-vision-250815' },
-					{ name: 'Kimi K2 (250711)', value: 'kimi-k2-250711' }
-				],
-				routing: {
-					send: {
-						type: 'body',
-						property: 'model',
-					},
-				},
-				default: 'deepseek-v3-1-250821',
-				displayOptions: {
-					hide: {
-						'@version': [{ _cnd: { gte: 1.2 } }],
-					},
-				},
-			},
-			{
-				displayName: 'Model',
-				name: 'model',
+				displayName: 'Endpoint',
+				name: 'endpoint',
 				type: 'resourceLocator',
-				default: { mode: 'list', value: 'deepseek-v3-1-250821' },
+				default: { mode: 'list', value: '' },
 				required: true,
 				modes: [
 					{
 						displayName: 'From List',
 						name: 'list',
 						type: 'list',
-						placeholder: 'Select model...',
+						placeholder: 'Select endpoint...',
 						typeOptions: {
-							searchListMethod: 'searchModels',
+							searchListMethod: 'searchEndpoints',
 							searchable: true,
 						},
 					},
@@ -121,15 +92,11 @@ export class VolcengineAiChain implements INodeType {
 						displayName: 'ID',
 						name: 'id',
 						type: 'string',
-						placeholder: 'deepseek-v3-1-250821',
+						placeholder: 'ep-xxxxxxxxxxxxxxxx',
 					},
 				],
-				description: 'Select VolcEngine AI model, you can choose from the list or directly enter the model ID [VolcEngine AI Models](https://www.volcengine.com/docs/82379/1330310)',
-				displayOptions: {
-					hide: {
-						'@version': [{ _cnd: { lte: 1.1 } }],
-					},
-				},
+				description:
+					'Select Volcengine Ark Endpoint (only Running status endpoints are shown). You can choose from the list or directly enter the endpoint ID.',
 			},
 			{
 				displayName:
@@ -157,11 +124,6 @@ export class VolcengineAiChain implements INodeType {
 						default: 'https://ark.cn-beijing.volces.com/api/v3',
 						description: 'Override the default base URL for the API',
 						type: 'string',
-						displayOptions: {
-							hide: {
-								'@version': [{ _cnd: { gte: 1.1 } }],
-							},
-						},
 					},
 					{
 						displayName: 'Frequency Penalty',
@@ -224,12 +186,6 @@ export class VolcengineAiChain implements INodeType {
 									'Favors more complete reasoning at the cost of more tokens generated and slower responses',
 							},
 						],
-						displayOptions: {
-							show: {
-								// reasoning_effort is only available on o1, o1-versioned, or on o3-mini and beyond. Not on o1-mini or other GPT-models.
-								'/model': [{ _cnd: { regex: '(^o1([-\\d]+)?$)|(^o[3-9].*)' } }],
-							},
-						},
 					},
 					{
 						displayName: 'Response Format',
@@ -260,6 +216,31 @@ export class VolcengineAiChain implements INodeType {
 						type: 'number',
 					},
 					{
+						displayName: 'Thinking Mode',
+						name: 'thinkingMode',
+						default: 'disabled',
+						type: 'options',
+						options: [
+							{
+								name: 'Disabled',
+								value: 'disabled',
+								description: 'Force disable deep thinking, model will not output reasoning chain',
+							},
+							{
+								name: 'Enabled',
+								value: 'enabled',
+								description: 'Force enable deep thinking, model will output reasoning chain',
+							},
+							{
+								name: 'Auto',
+								value: 'auto',
+								description: 'Model decides whether to use deep thinking based on the task',
+							},
+						],
+						description:
+							'Control deep thinking/reasoning mode for models that support it (e.g., DeepSeek R1, DeepSeek V3.2)',
+					},
+					{
 						displayName: 'Timeout',
 						name: 'timeout',
 						default: 60000,
@@ -281,13 +262,14 @@ export class VolcengineAiChain implements INodeType {
 	};
 
 	async supplyData(this: ISupplyDataFunctions, itemIndex: number): Promise<SupplyData> {
-		const credentials = await this.getCredentials('volcengineAiApi');
+		const credentials = await this.getCredentials('volcengineAiEnhancedApi');
 
-		const version = this.getNode().typeVersion;
-		const modelName =
-			version >= 1.2
-				? (this.getNodeParameter('model.value', itemIndex) as string)
-				: (this.getNodeParameter('model', itemIndex) as string);
+		// Get endpoint ID from resourceLocator
+		const endpointResource = this.getNodeParameter('endpoint', itemIndex) as {
+			mode: string;
+			value: string;
+		};
+		const endpointId = endpointResource.value;
 
 		const options = this.getNodeParameter('options', itemIndex, {}) as {
 			baseURL?: string;
@@ -300,6 +282,7 @@ export class VolcengineAiChain implements INodeType {
 			topP?: number;
 			responseFormat?: 'text' | 'json_object';
 			reasoningEffort?: 'low' | 'medium' | 'high';
+			thinkingMode?: 'disabled' | 'enabled' | 'auto';
 		};
 
 		const authType = (credentials.authType as string) || 'bearer';
@@ -313,20 +296,28 @@ export class VolcengineAiChain implements INodeType {
 			defaultHeaders: authType === 'x-api-key' ? { 'X-Api-Access-Key': accessToken } : undefined,
 		};
 
+		// Build modelKwargs with optional thinking and response_format
+		const modelKwargs: Record<string, unknown> = {};
+
+		if (options.responseFormat) {
+			modelKwargs.response_format = { type: options.responseFormat };
+		}
+
+		// Add thinking mode if specified (disabled/enabled/auto)
+		if (options.thinkingMode) {
+			modelKwargs.thinking = {
+				type: options.thinkingMode,
+			};
+		}
+
 		const model = new ChatOpenAI({
 			apiKey: accessToken,
-			model: modelName,
+			model: endpointId,
 			...options,
 			timeout: options.timeout ?? 60000,
 			maxRetries: options.maxRetries ?? 2,
 			configuration,
-
-			modelKwargs: options.responseFormat
-				? {
-						response_format: { type: options.responseFormat },
-					}
-				: undefined,
-
+			modelKwargs: Object.keys(modelKwargs).length > 0 ? modelKwargs : undefined,
 		});
 
 		return {
@@ -334,3 +325,4 @@ export class VolcengineAiChain implements INodeType {
 		};
 	}
 }
+
